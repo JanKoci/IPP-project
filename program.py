@@ -10,12 +10,11 @@ import sys
 
 
 class Program(object):
-"""Docstring for class Program.
-This class represents the program to be interpreted """
     def __init__(self, code):
         self.__gf = dict()
         self.__frameStack = list()
-        self.__labels = list() # labels could be in frames
+        self.__labels = dict() # name and position in code
+        # labels could be in frames ?
         self.__code = code
 
     @property
@@ -46,8 +45,8 @@ This class represents the program to be interpreted """
                 "is not implemented".format(inst) ,file=sys.stderr)
                 raise
 
-    def move(self, args):
+    def move(self, args): pass
         # perform move instruction
 
-    def createframe(self):
+    def createframe(self): pass
         # perform createframe instruction

@@ -1,32 +1,38 @@
 #!/usr/bin/env python3
 
-# import program
-# import xmlParser
+import program
+import xmlParser
 import argparse
+import sys
 
-class ArgsParseError(object):
-    """docstring for ArgsParseError."""
-    def __init__(self, message):
-        # Call the base class constructor with the parameters it needs ???
-        super(ValidationError, self).__init__(message)
+# class ArgumentParseError(Exception):
+#
+# class ArgumenttParser(argparse.ArgumentParser):
+#     def error(self, message):
+#         raise ArgumentParseError
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--source", type=str, metavar="filename", help="the source file with IPPcode18 program")
+parser.add_argument("--stats", type=str, metavar="filename", help="generate interpret"
+                    " statistics and write them to file")
+parser.add_argument("--insts", action='store_true', help="count the number "
+                            "of instructions in program, can be used only "
+                            "with argument --stats")
+parser.add_argument("--vars", action='store_true', help="count number of all "
+                            "created variables in program, can be used only "
+                            "with argument --stats")
 try:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--source", help="The source file with IPPcode18 program")
-    parser.add_argument("--stats", help="The file to write interpreter statistics to")
-    parser.add_argument("--insts", action='store_true', help="Count the number "
-                                "of instructions in program")
-    parser.add_argument("--vars", action='store_true', help="Count number of all "
-                                "created variables in program")
-
     args = parser.parse_args()
-
-    if (not args.stats):
-        if (args.insts or args.vars):
-            raise SystemExit
-    print(args)
-
-
 except SystemExit:
     exit(10)
+
+if (not args.stats):
+    if (args.insts or args.vars):
+        print("ERROR: Arguments --vars and --insts can be"
+                            " used only with argument --stats")
+        exit(10)
+print(args)
+
+if (args.stats is None):
+    print("No Stats!")
