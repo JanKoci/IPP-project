@@ -32,7 +32,4 @@ if (not args.stats):
         print("ERROR: Arguments --vars and --insts can be"
                             " used only with argument --stats")
         exit(10)
-print(args)
-
-if (args.stats is None):
-    print("No Stats!")
+# print(args)
