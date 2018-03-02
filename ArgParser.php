@@ -49,12 +49,12 @@ class ArgParser
           case 'store_true':
             // remove the first --
 
-            $ret_args[$name] = 'true';
+            $ret_args[$name] = true;
             unset($this->arg_vec[$index]);
             break;
           case 'store_false':
             // remove the first --
-            $ret_args[$name] = 'false';
+            $ret_args[$name] = false;
             unset($this->arg_vec[$index]);
             break;
 

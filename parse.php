@@ -11,6 +11,7 @@
   include 'my_regex.php';
   include 'ArgParser.php';
 
+  // parse command line arguments
   $message = "USAGE: php parse.php [--help] [--stats=file [--comments] [--loc]]";
   $parser = new ArgParser($usage=$message);
   $parser->add_argument("-help", $help='print this help message', $action='print_help');
@@ -21,17 +22,29 @@
   $parser->add_argument("-loc", $help='count number of instructions in code, can be used only with --stats argument',
                                       $action='store_true');
   $args = $parser->parse();
-  print_r($args);
-  exit(0);
+
+  if ($args['loc'] || $args['comments']) {
+    if (!$args['stats']) {
+      print("ERROR: arguments --loc and --comments cannot be used without argument --stats=filename\n");
+      exit(10);
+    }
+  }
+  if ($args['stats']) {
+    $stats_file = fopen($args['stats'], "w") or die("ERROR: unable to open file\n");
+  }
+
 
   // array of all instructions
   $instructions_array = array();
+  $comments = 0; // count number of comments
+  $numof_insts = 0;
 
   // na zacatku musi byt .ippcode18
   do {
     $line = fgets(STDIN);
     $data = explode('\n', $line);
     $data = explode('#', $data[0]);
+    if ($data[1]) {$comments++;}
     $data = preg_split("/\s+/", $data[0], -1, PREG_SPLIT_NO_EMPTY);
   } while (!$data);
 
@@ -44,6 +57,7 @@
     // splits line into words, ignores comments (starting with '#')
     $data = explode('\n', $line);
     $data = explode('#', $data[0]);
+    if ($data[1]) {$comments++;}
     $data = preg_split("/\s+/", $data[0], -1, PREG_SPLIT_NO_EMPTY);
 
     if ($data)
@@ -258,7 +272,9 @@
       }
     }
   }
-  // print_r($instructions_array);
+
+  // number of instructions for statistics
+  $numof_insts = count($instructions_array);
 
   // ______ generates XML representation of the code _______
   $xml = new DOMDocument('1.0', 'UTF-8');
@@ -285,5 +301,16 @@
 
   $xml->formatOutput = true;
   print $xml->saveXML();
+
+  // write the statistics if needed
+  if ($args['stats']) {
+    if ($args['comments']) {
+      fwrite($stats_file, "Number of comments: \t'$comments'\n");
+    }
+    if ($args['loc']) {
+      fwrite($stats_file, "Number of instructions:\t'$numof_insts'\n");
+    }
+    fclose($stats_file);
+  }
 
 ?>
