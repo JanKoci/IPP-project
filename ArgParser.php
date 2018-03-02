@@ -5,14 +5,18 @@
  */
 class ArgParse
 {
-  public $arguments;
+  private $arguments;
   private $arg_vec;
+  private $usage;
+  private $arg_count;
 
-  function __construct()
+  function __construct($usage='')
   {
     global $argv;
     $this->argumets = array();
     $this->arg_vec = $argv;
+    $this->arg_count = count($argv);
+    $this->usage = $usage;
   }
 
   public function add_argument($name, $help='', $action='get_val')
@@ -65,6 +69,13 @@ class ArgParse
             $ret_args[$arg->name] = $value;
             unset($this->arg_vec[$index]);
             break;
+          case 'print_help':
+            if ($this->arg_count > 2) {
+              print("ERROR: Argument --help cannot be used with any other argument\n");
+              exit(10);
+            }
+            $this->print_help();
+            exit(0);
         }
       }
     }
@@ -75,10 +86,18 @@ class ArgParse
     return $ret_args;
   }
 
+  public function print_help()
+  {
+    print($this->usage); echo "\n\n";
+    foreach ($this->argumets as $arg) {
+      print($arg->name."\t\t".$arg->help); echo "\n";
+    }
+  }
+
 }
 
 /**
- *
+ * Class representing command line argument
  */
 class Arg
 {
@@ -96,13 +115,11 @@ class Arg
   }
 }
 
-  $parser = new ArgParse();
-  $parser->add_argument('-source', $help="source filename", $action='get_val');
-  $parser->add_argument("-help", $help="print help message", $action='store_true');
-  // print_r($parser);
-  $args = $parser->parse();
-  print_r($args);
-
-
-
+  // _____________USAGE_____________
+  // $message = "USAGE: php ArgParser.php [--source=filename] [--help]";
+  // $parser = new ArgParse($usage=$message);
+  // $parser->add_argument('-source', $help="source filename", $action='get_val');
+  // $parser->add_argument("-help", $help="print help message", $action='print_help');
+  // $args = $parser->parse();
+  // print_r($args);
 ?>
