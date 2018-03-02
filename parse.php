@@ -9,7 +9,20 @@
 //##################################################################
   include 'instruction.php';
   include 'my_regex.php';
+  include 'ArgParser.php';
 
+  $message = "USAGE: php parse.php [--help] [--stats=file [--comments] [--loc]]";
+  $parser = new ArgParser($usage=$message);
+  $parser->add_argument("-help", $help='print this help message', $action='print_help');
+  $parser->add_argument("-stats", $help='generate statistics about parsed code in IPPcode18',
+                                  $action='get_val');
+  $parser->add_argument("-comments", $help='count number of comments in code, can be used only with --stats argument',
+                                     $action='store_true');
+  $parser->add_argument("-loc", $help='count number of instructions in code, can be used only with --stats argument',
+                                      $action='store_true');
+  $args = $parser->parse();
+  print_r($args);
+  exit(0);
 
   // array of all instructions
   $instructions_array = array();

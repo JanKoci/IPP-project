@@ -3,7 +3,7 @@
 /**
  * Argument parser for php
  */
-class ArgParse
+class ArgParser
 {
   private $arguments;
   private $arg_vec;
@@ -44,15 +44,17 @@ class ArgParse
           exit(10);
         }
         $index = $index[0];
+        $name = str_replace("-", "", $arg->name);
         switch ($arg->action) {
           case 'store_true':
             // remove the first --
-            $ret_args[$arg->name] = 'true';
+
+            $ret_args[$name] = 'true';
             unset($this->arg_vec[$index]);
             break;
           case 'store_false':
             // remove the first --
-            $ret_args[$arg->name] = 'false';
+            $ret_args[$name] = 'false';
             unset($this->arg_vec[$index]);
             break;
 
@@ -60,13 +62,18 @@ class ArgParse
             // remove the first --
             $data = explode('=', $match[$index]);
             if (count($data) == 1) {
-              $value = $this->arg_vec[$index+1];
+              $next_arg = $this->arg_vec[$index+1];
+              if (!$next_arg) {
+                print("ERROR: argument '$arg->name' requires a value\n");
+                exit(10);
+              }
+              $value = $next_arg;
               unset($this->arg_vec[$index+1]);
             }
             else {
               $value = $data[1];
             }
-            $ret_args[$arg->name] = $value;
+            $ret_args[$name] = $value;
             unset($this->arg_vec[$index]);
             break;
           case 'print_help':
@@ -90,7 +97,17 @@ class ArgParse
   {
     print($this->usage); echo "\n\n";
     foreach ($this->argumets as $arg) {
-      print($arg->name."\t\t".$arg->help); echo "\n";
+      if (strlen($arg->name) > 15)
+      {
+        $tabs = "\t";
+      }
+      elseif (strlen($arg->name) > 7){
+        $tabs = "\t\t";
+      }
+      else {
+        $tabs = "\t\t\t";
+      }
+      print($arg->name.$tabs.$arg->help); echo "\n";
     }
   }
 
@@ -117,7 +134,7 @@ class Arg
 
   // _____________USAGE_____________
   // $message = "USAGE: php ArgParser.php [--source=filename] [--help]";
-  // $parser = new ArgParse($usage=$message);
+  // $parser = new ArgParser($usage=$message);
   // $parser->add_argument('-source', $help="source filename", $action='get_val');
   // $parser->add_argument("-help", $help="print help message", $action='print_help');
   // $args = $parser->parse();
