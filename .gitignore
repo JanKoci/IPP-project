@@ -1,5 +1,5 @@
 # all trial (pokus) files
-pokus.*
+pokus*
 
 # all xml files
 *.xml
