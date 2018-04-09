@@ -39,18 +39,19 @@
   $comments = 0; // count number of comments
   $numof_insts = 0;
 
-  // na zacatku musi byt .ippcode18
+  // at the beginning must be written .ippcode18
   do {
     $line = fgets(STDIN);
     $data = explode('\n', $line);
     $data = explode('#', $data[0]);
     if ($data[1]) {$comments++;}
     $data = preg_split("/\s+/", $data[0], -1, PREG_SPLIT_NO_EMPTY);
-  } while (!$data);
+  } while (!$data && $line);
 
   if (strtolower($data[0]) != ".ippcode18")
   {
-    fwrite(STDERR, "ERROR: Kod musi zacinat nazvem .ippcode18");
+    fwrite(STDERR, "ERROR: Kod musi zacinat nazvem .ippcode18\n");
+    exit(21);
   }
 
   while ($line = fgets(STDIN)) {
@@ -68,6 +69,7 @@
         case "int2char":
         case "strlen":
         case "type":
+        case "not":
             // check correct number of arguments
             if (count($data) != 3)
             {
@@ -173,7 +175,6 @@
         case "eq":
         case "and":
         case "or":
-        case "not":
         case "stri2int":
         case "concat":
         case "getchar":
@@ -290,7 +291,7 @@
     $xml_inst->setAttribute("order", $counter);
     $xml_inst->setAttribute("opcode", $instruction->getType());
     foreach (array_values($instruction->getArguments()) as $i => $arg) {
-      $xml_arg = $xml->createElement("arg{$arg_counter}", $arg->getValue());
+      $xml_arg = $xml->createElement("arg{$arg_counter}", htmlspecialchars($arg->getValue()));
       $xml_arg->setAttribute("type", $arg->getType());
       $xml_inst->appendChild($xml_arg);
       $arg_counter++;
@@ -304,11 +305,21 @@
 
   // write the statistics if needed
   if ($args['stats']) {
-    if ($args['comments']) {
-      fwrite($stats_file, "Number of comments: \t'$comments'\n");
+    if ($args['comments'] && $args['loc']) {
+      if(array_search('--comments', $argv) > array_search('--loc', $argv)) {
+          fwrite($stats_file, "$numof_insts\n");
+          fwrite($stats_file, "$comments\n");
+      }
+      else {
+        fwrite($stats_file, "$comments\n");
+        fwrite($stats_file, "$numof_insts\n");
+      }
     }
-    if ($args['loc']) {
-      fwrite($stats_file, "Number of instructions:\t'$numof_insts'\n");
+    else if ($args['comments']) {
+      fwrite($stats_file, "$comments\n");
+    }
+    else if ($args['loc']) {
+      fwrite($stats_file, "$numof_insts\n");
     }
     fclose($stats_file);
   }
