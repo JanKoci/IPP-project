@@ -1,15 +1,15 @@
 <?php
 //##################################################################
-// Projekt IPP
-// Autor: Jan Koci
-// Datum: 26.2.2018
-// Popis: Definice trid pro prvni cast projekt (parser.php)
+// Project IPP
+// Author: Jan Koci
+// Date: 26.2.2018
+// Brief: Class definitions for parse.php
 //##################################################################
 
 /**
- * Trida pro argument instrukce v IPPcode18
- * atribut $type    typ argumentu
- * atribut $value   hodnota argumentu
+ * Class for instruction's argument in ippcode18
+ * attribute $type    type of argument
+ * attribute $value   value of argument
  */
 class Argument
 {
@@ -21,29 +21,24 @@ class Argument
     if (preg_match('/^(lf|gf|tf)@.*/i', $argument))
     {
       $this->type = 'var';
-      $temp = explode('@', $argument);
+      $temp = explode('@', $argument, 2);
       $this->value = strtoupper($temp[0]).'@'.$temp[1];
     }
     else if (preg_match('/^(int|string|bool)@.*/i', $argument))
     {
-      $temp = explode('@', $argument);
+      $temp = explode('@', $argument, 2);
       $temp[0] = strtolower($temp[0]);
-      if ($temp[0] == "string")
+
+      if ($temp[0] == "bool")
       {
-        $temp[1] = preg_replace('/&/', '&amp;', $temp[1]);
-        $temp[1] = preg_replace(array('/</', '/>/'), array('&lt;', '&gt;'), $temp[1]);
-      }
-      else if ($temp[0] == "bool")
-      {
-        $temp[1] = strtolower($temp[1]); // true/false musi byt lowercase
+        $temp[1] = strtolower($temp[1]); // true/false must be lowercase
       }
       $this->type = $temp[0];
       $this->value = $temp[1];
     }
     else
     {
-      $argument = preg_replace('/&/', '&amp;', $argument);
-      $argument = preg_replace(array('/</', '/>/'), array('&lt;', '&gt;'), $argument);
+
       $this->type = 'label';
       $this->value = $argument;
     }
@@ -104,6 +99,4 @@ class Argument
   // $instruction->getArguments()[1]->type = "type";
   // $instruction->getArguments()[1]->value = strtolower($data[2]);
   // print_r($instruction);
-
-
  ?>

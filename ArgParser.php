@@ -1,4 +1,10 @@
 <?php
+//##################################################################
+// Project IPP
+// Author: Jan Koci
+// Date: 26.2.2018
+// Brief: Command line arguments parser for php
+//##################################################################
 
 /**
  * Argument parser for php
