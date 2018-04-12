@@ -4,4 +4,5 @@ pokus*
 # all xml files
 *.xml
 
-
+# bytecode of modules
+__pycache__
