@@ -257,3 +257,37 @@ class Program(object):
         value2 = int(value)
         add_value = value1 + value2
         var_frame[var_name].value = Variable(dtype=dtype, value=str(add_value))
+
+    def SUB(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        if (args[1].type == 'var'):
+            var1_frame, var1_name = self.__split_var(args[1].value)
+            self.__check_var(var1_frame, var1_name)
+            symb = var1_frame[var1_name]
+            dtype = symb.dtype
+            value = symb.value
+        else:
+            dtype = args[1].type
+            value = args[1].value
+        if (dtype != 'int'):
+            raise RuntimeException("Instruction ADD expects all arguments "
+                    "of type 'int'", exit_code=53)
+        value1 = int(value)
+
+        if (args[2].type == 'var'):
+            var2_frame, var2_name = self.__split_var(args[2].value)
+            self.__check_var(var2_frame, var2_name)
+            symb = var2_frame[var2_name]
+            dtype = symb.dtype
+            value = symb.value
+        else:
+            dtype = args[2].type
+            value = args[2].value
+        if (dtype != 'int'):
+            raise RuntimeException("Instruction ADD expects all arguments "
+                    "of type 'int'", exit_code=53)
+        value2 = int(value)
+        sub_value = value1 - value2
+        var_frame[var_name].value = Variable(dtype=dtype, value=str(sub_value))
