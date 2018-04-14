@@ -64,11 +64,13 @@ class XmlParser(object):
         return self.instructions
 
 
-try:
-    parser = XmlParser(file_handle='a.xml')
-    code = parser.parse()
-except InterpretException as e:
-    exit(e.exit_code)
+############## USAGE ##############
+if __name__ == "__main__":
+    try:
+        parser = XmlParser(file_handle='a.xml')
+        code = parser.parse()
+    except InterpretException as e:
+        exit(e.exit_code)
 
-for instruction in code:
-    print(instruction)
+        for instruction in code:
+            print(instruction)
