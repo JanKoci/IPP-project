@@ -8,6 +8,7 @@
 
 import sys
 import Instruction
+import re
 from MyExceptions import *
 
 
@@ -146,7 +147,7 @@ class Program(object):
             try:
                 method(self, inst.arguments)
             except InterpretException as e:
-                print ("Instruction {0}".format(self.__instCounter+1))
+                print ("Instruction {0}".format(self.__instCounter+1), file=sys.stderr)
                 raise e
             self.__instCounter += 1
             # print("Inst: {0}:\nGF = {1}\nTR = {2}\nLF = {3}\nDataStack = {4}\nCallStack = {5}\nLabels = {6}\n".format(self.__instCounter,
@@ -431,7 +432,7 @@ class Program(object):
         dtype, value = self.__parse_symb(args[1])
         if (dtype != 'int'):
             raise RuntimeException("Instruction INT2CHAR expects second argument "
-                    "of type 'int'", exit_code=58) #todo: or exit_code 53
+                    "of type 'int'", exit_code=53) #todo: or exit_code 53
         value = int(value)
         try:
             value = chr(value)
@@ -497,7 +498,7 @@ class Program(object):
         else:
             dtype = arg[0].type
             value = arg[0].value
-        print(value)
+        print(re.sub(r'\\(\d{3})', lambda x: chr(int(x.group(1))), value, re.UNICODE))
 
     def CONCAT(self, args):
         var_frame, var_name = self.__split_var(args[0].value)
