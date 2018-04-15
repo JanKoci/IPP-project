@@ -134,8 +134,6 @@ class Program(object):
                 self.LABEL(inst.arguments)
             self.__instCounter += 1
         self.__instCounter = 0
-        # print("Inst: {0}:\nGF = {1}\nTR = {2}\nLF = {3}\nDataStack = {4}\nCallStack = {5}\nLabels = {6}\n".format(self.__instCounter,
-        #     self.__gf, self.__tempFrame, self.__localFrame, self.__dataStack, self.__callStack, self.__labels))
         while True:
             inst = self.code[self.__instCounter]
             try:
@@ -150,8 +148,6 @@ class Program(object):
                 print ("Instruction {0}".format(self.__instCounter+1), file=sys.stderr)
                 raise e
             self.__instCounter += 1
-            # print("Inst: {0}:\nGF = {1}\nTR = {2}\nLF = {3}\nDataStack = {4}\nCallStack = {5}\nLabels = {6}\n".format(self.__instCounter,
-            #     self.__gf, self.__tempFrame, self.__localFrame, self.__dataStack, self.__callStack, self.__labels))
             if (self.__instCounter >= len(self.code)):
                 break
 

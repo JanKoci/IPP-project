@@ -32,7 +32,7 @@ parser.add_argument("--vars", action='store_true', help="count number of all "
 try:
     args = parser.parse_args()
 except SystemExit:
-    exit(10)
+    exit(0)
 
 if (not args.stats):
     if (args.insts or args.vars):

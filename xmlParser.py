@@ -65,12 +65,12 @@ class XmlParser(object):
 
 
 ############## USAGE ##############
-if __name__ == "__main__":
-    try:
-        parser = XmlParser(file_handle='a.xml')
-        code = parser.parse()
-    except InterpretException as e:
-        exit(e.exit_code)
-
-        for instruction in code:
-            print(instruction)
+# if __name__ == "__main__":
+#     try:
+#         parser = XmlParser(file_handle='a.xml')
+#         code = parser.parse()
+#     except InterpretException as e:
+#         exit(e.exit_code)
+#
+#         for instruction in code:
+#             print(instruction)
