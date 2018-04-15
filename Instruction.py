@@ -88,14 +88,14 @@ class Instruction(object):
         self.__parse_args(instruction)
 
     def __parse_args(self, instruction):
-        symb = ["var", "int", "float", "string", "bool"]
+        symb = ["var", "int", "string", "bool"]
         opcode = instruction.get('opcode')
         order = instruction.get('order')
         err_message = "Instruction order = '{0}' ".format(order)
         args_count = len(instruction)
 
         # <var> <symb>
-        if (opcode in ["MOVE", "INT2CHAR", "STRLEN", "TYPE"]):
+        if (opcode in ["MOVE", "INT2CHAR", "STRLEN", "TYPE", "NOT"]):
             err_message += "\nInstruction '{0}' expects arguments <var> <symb>".format(opcode)
             if (args_count != 2):
                 raise InstructException(err_message)
@@ -132,7 +132,7 @@ class Instruction(object):
                 raise InstructException(err_message)
         # <var> <symb1> <symb2>
         elif (opcode in ["ADD", "SUB", "MUL", "IDIV", "LT", "GT", "EQ",
-            "AND", "OR", "NOT", "STRI2INT", "CONCAT", "GETCHAR", "SETCHAR"]):
+            "AND", "OR", "STRI2INT", "CONCAT", "GETCHAR", "SETCHAR"]):
             err_message += ("\nInstruction '{0}' expects arguments "
                             "<var> <symb1> <symb2>".format(opcode))
             if (args_count != 3):

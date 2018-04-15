@@ -115,9 +115,26 @@ class Program(object):
         var_name = var.split('@')[1]
         return (var_frame, var_name)
 
+    def __parse_symb(self, symb):
+        if (symb.type == 'var'):
+            var_frame, var_name = self.__split_var(symb.value)
+            self.__check_var(var_frame, var_name)
+            symb = var_frame[var_name]
+            dtype = symb.dtype
+            value = symb.value
+        else:
+            dtype = symb.type
+            value = symb.value
+        return (dtype,value)
+
     def interpret(self):
-        print("Inst: {0}:\nGF = {1}\nTR = {2}\nLF = {3}\nDataStack = {4}\nCallStack = {5}\nLabels = {6}\n".format(self.__instCounter,
-            self.__gf, self.__tempFrame, self.__localFrame, self.__dataStack, self.__callStack, self.__labels))
+        for inst in self.code:
+            if (inst.type == 'LABEL'):
+                self.LABEL(inst.arguments)
+            self.__instCounter += 1
+        self.__instCounter = 0
+        # print("Inst: {0}:\nGF = {1}\nTR = {2}\nLF = {3}\nDataStack = {4}\nCallStack = {5}\nLabels = {6}\n".format(self.__instCounter,
+        #     self.__gf, self.__tempFrame, self.__localFrame, self.__dataStack, self.__callStack, self.__labels))
         while True:
             inst = self.code[self.__instCounter]
             try:
@@ -132,8 +149,8 @@ class Program(object):
                 print ("Instruction {0}".format(self.__instCounter+1))
                 raise e
             self.__instCounter += 1
-            print("Inst: {0}:\nGF = {1}\nTR = {2}\nLF = {3}\nDataStack = {4}\nCallStack = {5}\nLabels = {6}\n".format(self.__instCounter,
-                self.__gf, self.__tempFrame, self.__localFrame, self.__dataStack, self.__callStack, self.__labels))
+            # print("Inst: {0}:\nGF = {1}\nTR = {2}\nLF = {3}\nDataStack = {4}\nCallStack = {5}\nLabels = {6}\n".format(self.__instCounter,
+            #     self.__gf, self.__tempFrame, self.__localFrame, self.__dataStack, self.__callStack, self.__labels))
             if (self.__instCounter >= len(self.code)):
                 break
 
@@ -141,17 +158,8 @@ class Program(object):
         # perform move instruction
         var1_frame, var1_name = self.__split_var(args[0].value)
         self.__check_var(var1_frame, var1_name)
-
-        if (args[1].type == 'var'):
-            var2_frame, var2_name = self.__split_var(args[1].value)
-            self.__check_var(var2_frame, var2_name)
-            var2 = var2_frame[var2_name]
-        else:
-            dtype = args[1].type
-            value = args[1].value
-            var2 = Variable(dtype=dtype, value=value)
-
-        var1_frame[var1_name].value = var2
+        dtype, value = self.__parse_symb(args[1])
+        var1_frame[var1_name].value = Variable(dtype=dtype, value=value)
 
 
     def CREATEFRAME(self, no_args):
@@ -197,7 +205,8 @@ class Program(object):
     def LABEL(self, arg):
         label_name = arg[0].value
         if (label_name in self.__labels):
-            raise RuntimeException("Redefinition of label {0}".format(label_name),
+            if (self.__labels[label_name] != self.__instCounter):
+                raise RuntimeException("Redefinition of label {0}".format(label_name),
                                     exit_code=52)
         self.__labels[label_name] = self.__instCounter
 
@@ -227,30 +236,14 @@ class Program(object):
     def ADD(self, args):
         var_frame, var_name = self.__split_var(args[0].value)
         self.__check_var(var_frame, var_name)
+        dtype, value = self.__parse_symb(args[1])
 
-        if (args[1].type == 'var'):
-            var1_frame, var1_name = self.__split_var(args[1].value)
-            self.__check_var(var1_frame, var1_name)
-            symb = var1_frame[var1_name]
-            dtype = symb.dtype
-            value = symb.value
-        else:
-            dtype = args[1].type
-            value = args[1].value
         if (dtype != 'int'):
             raise RuntimeException("Instruction ADD expects all arguments "
                     "of type 'int'", exit_code=53)
         value1 = int(value)
 
-        if (args[2].type == 'var'):
-            var2_frame, var2_name = self.__split_var(args[2].value)
-            self.__check_var(var2_frame, var2_name)
-            symb = var2_frame[var2_name]
-            dtype = symb.dtype
-            value = symb.value
-        else:
-            dtype = args[2].type
-            value = args[2].value
+        dtype, value = self.__parse_symb(args[2])
         if (dtype != 'int'):
             raise RuntimeException("Instruction ADD expects all arguments "
                     "of type 'int'", exit_code=53)
@@ -262,32 +255,382 @@ class Program(object):
         var_frame, var_name = self.__split_var(args[0].value)
         self.__check_var(var_frame, var_name)
 
-        if (args[1].type == 'var'):
-            var1_frame, var1_name = self.__split_var(args[1].value)
-            self.__check_var(var1_frame, var1_name)
-            symb = var1_frame[var1_name]
-            dtype = symb.dtype
-            value = symb.value
-        else:
-            dtype = args[1].type
-            value = args[1].value
+        dtype, value = self.__parse_symb(args[1])
         if (dtype != 'int'):
-            raise RuntimeException("Instruction ADD expects all arguments "
+            raise RuntimeException("Instruction SUB expects all arguments "
                     "of type 'int'", exit_code=53)
         value1 = int(value)
 
-        if (args[2].type == 'var'):
-            var2_frame, var2_name = self.__split_var(args[2].value)
-            self.__check_var(var2_frame, var2_name)
-            symb = var2_frame[var2_name]
-            dtype = symb.dtype
-            value = symb.value
-        else:
-            dtype = args[2].type
-            value = args[2].value
+        dtype, value = self.__parse_symb(args[2])
         if (dtype != 'int'):
-            raise RuntimeException("Instruction ADD expects all arguments "
+            raise RuntimeException("Instruction SUB expects all arguments "
                     "of type 'int'", exit_code=53)
         value2 = int(value)
         sub_value = value1 - value2
         var_frame[var_name].value = Variable(dtype=dtype, value=str(sub_value))
+
+    def MUL(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype, value = self.__parse_symb(args[1])
+        if (dtype != 'int'):
+            raise RuntimeException("Instruction MUL expects all arguments "
+                    "of type 'int'", exit_code=53)
+        value1 = int(value)
+
+        dtype, value = self.__parse_symb(args[2])
+        if (dtype != 'int'):
+            raise RuntimeException("Instruction MUL expects all arguments "
+                    "of type 'int'", exit_code=53)
+        value2 = int(value)
+        mul_value = value1 * value2
+        var_frame[var_name].value = Variable(dtype=dtype, value=str(mul_value))
+
+    def IDIV(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype, value = self.__parse_symb(args[1])
+        if (dtype != 'int'):
+            raise RuntimeException("Instruction IDIV expects all arguments "
+                    "of type 'int'", exit_code=53)
+        value1 = int(value)
+
+        dtype, value = self.__parse_symb(args[2])
+        if (dtype != 'int'):
+            raise RuntimeException("Instruction IDIV expects all arguments "
+                    "of type 'int'", exit_code=53)
+        value2 = int(value)
+        if (value2 == 0):
+            raise RuntimeException("Division by zero", exit_code=57)
+        idiv_value = value1 // value2
+        var_frame[var_name].value = Variable(dtype=dtype, value=str(idiv_value))
+
+    def LT(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype1, value1 = self.__parse_symb(args[1])
+
+        dtype2, value2 = self.__parse_symb(args[2])
+
+        if (dtype1 != dtype2):
+            raise RuntimeException("Instruction LT expects arguments of same type",
+                                    exit_code=53)
+        if (dtype1 == 'bool'):
+            value1 = False if value1 == 'false' else True
+            value2 = False if value2 == 'false' else True
+        elif (dtype1 == 'int'):
+            value1 = int(value1)
+            value2 = int(value2)
+        else: pass
+        res_value = value1 < value2
+        res_value = 'true' if res_value == True else 'false'
+        var_frame[var_name].value = Variable(dtype='bool', value=res_value)
+
+    def GT(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype1, value1 = self.__parse_symb(args[1])
+
+        dtype2, value2 = self.__parse_symb(args[2])
+
+        if (dtype1 != dtype2):
+            raise RuntimeException("Instruction GT expects arguments of same type",
+                                    exit_code=53)
+        if (dtype1 == 'bool'):
+            value1 = False if value1 == 'false' else True
+            value2 = False if value2 == 'false' else True
+        elif (dtype1 == 'int'):
+            value1 = int(value1)
+            value2 = int(value2)
+        else: pass
+        res_value = value1 > value2
+        res_value = 'true' if res_value == True else 'false'
+        var_frame[var_name].value = Variable(dtype='bool', value=res_value)
+
+    def EQ(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype1, value1 = self.__parse_symb(args[1])
+
+        dtype2, value2 = self.__parse_symb(args[2])
+
+        if (dtype1 != dtype2):
+            raise RuntimeException("Instruction LT expects arguments of same type",
+                                    exit_code=53)
+        if (dtype1 == 'bool'):
+            value1 = False if value1 == 'false' else True
+            value2 = False if value2 == 'false' else True
+        elif (dtype1 == 'int'):
+            value1 = int(value1)
+            value2 = int(value2)
+        else: pass
+        res_value = value1 == value2
+        res_value = 'true' if res_value == True else 'false'
+        var_frame[var_name].value = Variable(dtype='bool', value=res_value)
+
+    def AND(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype, value = self.__parse_symb(args[1])
+        if (dtype != 'bool'):
+            raise RuntimeException("Instruction AND expects all arguments "
+                    "of type 'bool'", exit_code=53)
+        value1 = False if value == 'false' else True
+
+        dtype, value = self.__parse_symb(args[2])
+        if (dtype != 'bool'):
+            raise RuntimeException("Instruction AND expects all arguments "
+                    "of type 'bool'", exit_code=53)
+        value2 = False if value == 'false' else True
+        res_value = value1 and value2
+        res_value = 'false' if res_value == False else 'true'
+        var_frame[var_name].value = Variable(dtype=dtype, value=res_value)
+
+    def OR(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype, value = self.__parse_symb(args[1])
+        if (dtype != 'bool'):
+            raise RuntimeException("Instruction OR expects all arguments "
+                    "of type 'bool'", exit_code=53) #todo: if value is None exit_code=56!!!
+        value1 = False if value == 'false' else True
+
+        dtype, value = self.__parse_symb(args[2])
+        if (dtype != 'bool'):
+            raise RuntimeException("Instruction OR expects all arguments "
+                    "of type 'bool'", exit_code=53)
+        value2 = False if value == 'false' else True
+        res_value = value1 or value2
+        res_value = 'false' if res_value == False else 'true'
+        var_frame[var_name].value = Variable(dtype=dtype, value=res_value)
+
+    def NOT(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype, value = self.__parse_symb(args[1])
+        if (dtype != 'bool'):
+            raise RuntimeException("Instruction OR expects all arguments "
+                    "of type 'bool'", exit_code=53)
+        value = False if value == 'false' else True
+        value = not value
+        value = 'false' if value == False else 'true'
+        var_frame[var_name].value = Variable(dtype=dtype, value=value)
+
+    def INT2CHAR(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype, value = self.__parse_symb(args[1])
+        if (dtype != 'int'):
+            raise RuntimeException("Instruction INT2CHAR expects second argument "
+                    "of type 'int'", exit_code=58) #todo: or exit_code 53
+        value = int(value)
+        try:
+            value = chr(value)
+        except ValueError:
+            raise RuntimeException("Argument {0} is not a valid Unicode"
+                                " ordinal value".format(value), exit_code=58)
+        var_frame[var_name].value = Variable(dtype='string', value=value)
+
+    def STRI2INT(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype, value = self.__parse_symb(args[1])
+        if (dtype != 'string'):
+            raise RuntimeException("Instruction STRI2INT expects first argument "
+                    "of type 'string'", exit_code=53) #todo: if value is None exit_code=56!!!
+        value1 = str(value)
+
+        dtype, value = self.__parse_symb(args[2])
+        if (dtype != 'int'):
+            raise RuntimeException("Instruction STRI2INT expects second argument "
+                    "of type 'int'", exit_code=53) #todo: if value is None exit_code=56!!!
+        value2 = int(value)
+        try:
+            char = value1[value2]
+            value = ord(char)
+        except IndexError:
+            raise RuntimeException("Index out of range", exit_code=58)
+        except Exception:
+            raise RuntimeException("Cannot get int value of Unicode "
+                            "character {0}".format(char), exit_code=58)
+
+        var_frame[var_name].value = Variable(dtype='int', value=value)
+
+    def READ(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+        dtype = args[1].value
+        value = input()
+        try:
+            if (dtype == 'int'):
+                value = int(value)
+            elif (dtype == 'bool'):
+                value = 'true' if value.lower() == 'true' else 'false'
+            else:
+                value = str(value)
+        except Exception:
+            if (dtype == 'int'):
+                value = 0
+            elif (dtype == 'bool'):
+                value = 'false'
+            else:
+                value = ""
+        var_frame[var_name].value = Variable(dtype=dtype, value=str(value))
+
+    def WRITE(self, arg):
+        if (arg[0].type == 'var'):
+            var_frame, var_name = self.__split_var(arg[0].value)
+            self.__check_var(var_frame, var_name)
+            symb = var_frame[var_name]
+            dtype = symb.dtype
+            value = symb.value
+        else:
+            dtype = arg[0].type
+            value = arg[0].value
+        print(value)
+
+    def CONCAT(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype, value1 = self.__parse_symb(args[1])
+        if (dtype != 'string'):
+            raise RuntimeException("Instruction CONCAT expects all arguments "
+                    "of type 'string'", exit_code=53) #todo: if value is None exit_code=56!!!
+
+        dtype, value2 = self.__parse_symb(args[2])
+        if (dtype != 'string'):
+            raise RuntimeException("Instruction CONCAT expects all arguments "
+                    "of type 'string'", exit_code=53)
+        value = value1 + value2
+        var_frame[var_name].value = Variable(dtype=dtype, value=value)
+
+    def STRLEN(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype, value = self.__parse_symb(args[1])
+        if (dtype != 'string'):
+            raise RuntimeException("Instruction STRLEN expects second argument "
+                    "of type 'string'", exit_code=53) #todo: if value is None exit_code=56!!!
+        length = len(value)
+        var_frame[var_name].value = Variable(dtype='int', value=length)
+
+    def GETCHAR(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+
+        dtype, value1 = self.__parse_symb(args[1])
+        if (dtype != 'string'):
+            raise RuntimeException("Instruction GETCHAR expects second argument "
+                    "of type 'string'", exit_code=53) #todo: if value is None exit_code=56!!!
+
+        dtype, value2 = self.__parse_symb(args[2])
+        if (dtype != 'int'):
+            raise RuntimeException("Instruction GETCHAR expects third arguments "
+                    "of type 'int'", exit_code=53)
+        value2 = int(value2)
+        try:
+            char = value1[value2]
+        except IndexError:
+            raise RuntimeException("Index out of range", exit_code=58)
+        var_frame[var_name] = Variable(dtype='string', value=char)
+
+
+    def SETCHAR(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+        dtype, value = self.__parse_symb(args[0])
+        if (dtype != 'string'):
+            raise RuntimeException("Instruction SETCHAR expects first argument "
+                            "of type 'string'", exit_code=53)
+
+        dtype, value1 = self.__parse_symb(args[1])
+        if (dtype != 'int'):
+            raise RuntimeException("Instruction SETCHAR expects second argument "
+                            "of type 'int'", exit_code=53)
+        value1 = int(value1)
+        dtype, value2 = self.__parse_symb(args[2])
+        if (dtype != 'string'):
+            raise RuntimeException("Instruction SETCHAR expects third argument "
+                            "of type 'string'", exit_code=53)
+        if (len(value2) == 0):
+            raise RuntimeException("String <symb2> is empty", exit_code=58)
+        value = list(value)
+        value[value1] = value2[0]
+        value = "".join(value)
+        var_frame[var_name].value = Variable(dtype='string', value=value)
+
+    def TYPE(self, args):
+        var_frame, var_name = self.__split_var(args[0].value)
+        self.__check_var(var_frame, var_name)
+        dtype, value = self.__parse_symb(args[1])
+        var_frame[var_name].value = Variable(dtype='string', value=dtype)
+
+    def JUMP(self, args):
+        label_name = args[0].value
+        if (label_name not in self.__labels):
+            raise RuntimeException("Label {0} is not defined".format(label_name),
+                                    exit_code=52)
+        self.__instCounter = self.__labels[label_name]
+
+    def JUMPIFEQ(self, args):
+        label_name = args[0].value
+        if (label_name not in self.__labels):
+            raise RuntimeException("Label {0} is not defined".format(label_name),
+                                    exit_code=52)
+        dtype1, value1 = self.__parse_symb(args[1])
+
+        dtype2, value2 = self.__parse_symb(args[2])
+
+        if (dtype1 != dtype2):
+            raise RuntimeException("Instruction JUMPIFEQ expects arguments of same type",
+                                    exit_code=53)
+        if (dtype1 == 'bool'):
+            value1 = False if value1 == 'false' else True
+            value2 = False if value2 == 'false' else True
+        elif (dtype1 == 'int'):
+            value1 = int(value1)
+            value2 = int(value2)
+        else: pass
+        if (value1 == value2):
+            self.__instCounter = self.__labels[label_name]
+
+    def JUMPIFNEQ(self, args):
+        label_name = args[0].value
+        if (label_name not in self.__labels):
+            raise RuntimeException("Label {0} is not defined".format(label_name),
+                                    exit_code=52)
+        dtype1, value1 = self.__parse_symb(args[1])
+
+        dtype2, value2 = self.__parse_symb(args[2])
+
+        if (dtype1 != dtype2):
+            raise RuntimeException("Instruction JUMPIFNEQ expects arguments of same type",
+                                    exit_code=53)
+        if (dtype1 == 'bool'):
+            value1 = False if value1 == 'false' else True
+            value2 = False if value2 == 'false' else True
+        elif (dtype1 == 'int'):
+            value1 = int(value1)
+            value2 = int(value2)
+        else: pass
+        if (value1 != value2):
+            self.__instCounter = self.__labels[label_name]
+
+    def DPRINT(self, arg):
+        print(arg)
+
+    def BREAK(self, no_args):
+        print("Inst: {0}:\nGF = {1}\nTR = {2}\nLF = {3}\nDataStack = {4}\nCallStack = {5}\nLabels = {6}\n".format(self.__instCounter,
+            self.__gf, self.__tempFrame, self.__localFrame, self.__dataStack, self.__callStack, self.__labels))

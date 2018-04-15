@@ -7,9 +7,9 @@ var_regex = r'^(GF|LF|TF)@[a-zA-Z_\-\&%\*\$]+[a-zA-Z0-9_\-\&%\*\$]*$'
 int_regex = r'^[+-]?[0-9]+$'
 bool_regex = r'^(true|false)$'
 string_regex = r'^[^\s#]*$'
-float_regex = r'^[+-]?0x[01]\.[0-9a-fA-F]+p[+-][0-9]+$' # IS IT OK ????
+
 label_regex = r'^[a-zA-Z_\-\&%\*\$]+[a-zA-Z0-9_\-\&%\*\$]*$'
-type_regex = r'^(int|string|bool|float)$'
+type_regex = r'^(int|string|bool)$'
 
 class Argument(object):
     """docstring for Argument."""
@@ -56,10 +56,6 @@ class Argument(object):
 
         elif (self.type == 'int'):
             if (not re.match(int_regex, arg_value)):
-                raise InstructException(err_message)
-
-        elif (self.type == 'float'):
-            if (not re.match(float_regex, arg_value)):
                 raise InstructException(err_message)
 
         elif (self.type == 'string'):
