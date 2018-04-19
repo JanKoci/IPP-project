@@ -4,5 +4,11 @@ pokus*
 # all xml files
 *.xml
 
+doc.pages
+ipp_tests
+.DS_Store
+index.html
+*.zip
+
 # bytecode of modules
 __pycache__
